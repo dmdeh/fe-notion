@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import debounce from "../utils/debounce";
 import { useParams } from "react-router-dom";
 import { createBlock, deleteData } from "../services/api";
@@ -32,6 +32,7 @@ function ArticleLayout() {
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([]);
   const { data: pageData } = useGetPage(`pages/${pageId}`);
+  const cursorPositionRef = useRef<{ node: Node; offset: number } | null>(null);
 
   const saveTitle = useCallback(
     debounce((newTitle: string) => {
@@ -43,6 +44,16 @@ function ArticleLayout() {
 
   const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
     const newTitle = e.currentTarget.innerText;
+
+    const selection = window.getSelection(); // 커서 위치 저장
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      cursorPositionRef.current = {
+        node: range.endContainer,
+        offset: range.endOffset,
+      };
+    }
+    
     saveTitle(newTitle);
   };
 
@@ -109,6 +120,15 @@ function ArticleLayout() {
     updatedBlocks[index].content = newContent;
     const blockId = updatedBlocks[index]._id;
     saveBlock(blockId, newContent);
+
+    const selection = window.getSelection(); // 커서 위치 저장
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      cursorPositionRef.current = {
+        node: range.endContainer,
+        offset: range.endOffset,
+      };
+    }
   };
 
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
@@ -141,6 +161,22 @@ function ArticleLayout() {
       setBlocks(pageData.blocklist);
     }
   }, [pageData, pageId]);
+
+  const restoreCursorPosition = () => {
+    const selection = window.getSelection();
+    const cursorPosition = cursorPositionRef.current;
+    if (selection && cursorPosition) {
+      const range = document.createRange();
+      range.setStart(cursorPosition.node, cursorPosition.offset);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  };
+
+  useEffect(() => {
+    restoreCursorPosition();
+  });
 
   return (
     <Wrapper>
