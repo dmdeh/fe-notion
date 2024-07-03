@@ -1,12 +1,20 @@
 import styled from "styled-components";
-import { FormEvent, KeyboardEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import debounce from "../utils/debounce";
 import { useParams } from "react-router-dom";
-import { createBlock, deleteData, useGetPage, usePatchNewTitle, usePatchBlockContent, usePatchBlockOrder, usePatchBlockData } from "../services/api";
+import { createBlock, deleteData } from "../services/api";
 import BlockList from "./BlockList";
-import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import { HolderOutlined } from "@ant-design/icons";
 import SocketIO, { socket } from "./SocketIO";
+import { useGetPage } from "../hooks/usePage";
+import usePatchBlockData from "../hooks/usePatchBlockData";
+import { usePatchNewTitle } from "../hooks/usePatchNewTitle";
 
 export interface Block {
   type: string;
@@ -19,12 +27,7 @@ export interface Block {
 function ArticleLayout() {
   const { id: pageId } = useParams<{ id: string }>();
   const updateNewTitle = usePatchNewTitle(pageId);
-
   const updateBlock = usePatchBlockData(pageId);
-  // usePatchBlock, usePatchBlockContent, usePatchBlockOrder 뭉치는 작업중
-  // const updateNewBlock = usePatchBlock(pageId);
-  const updateBlockContent = usePatchBlockContent(pageId);
-  const updateBlockOrder = usePatchBlockOrder(pageId);
 
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -38,19 +41,22 @@ function ArticleLayout() {
     []
   );
 
-  const handleTitleChange = (e: FormEvent<HTMLDivElement>) => {
+  const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
     const newTitle = e.currentTarget.innerText;
     saveTitle(newTitle);
   };
 
-  const handleTitleKeyDown = async (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleTitleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key == "Enter") {
       e.preventDefault();
       await handleKeyDown(e, -1);
     }
   };
 
-  const handleKeyDown = async ( e: KeyboardEvent<HTMLDivElement>, index: number ) => {
+  const handleKeyDown = async (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    index: number
+  ) => {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
@@ -70,11 +76,7 @@ function ArticleLayout() {
           .map((block) => ({ ...block, index: block.index + 1 })),
       ];
       setBlocks(updatedBlocks);
-      // updateNewBlock({ newData, blockId });
-      updateBlock({
-        endpoint: `pages/${pageId}/blocks/${blockId}`,
-        data: { newData, blockId },
-      });
+      updateBlock({ type: "block", blockId, newData });
       socket.emit("block_updated", { pageId, blocks: updatedBlocks }); // 소켓 블록 content 업데이트 전송
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
@@ -95,19 +97,18 @@ function ArticleLayout() {
 
   const saveBlock = useCallback(
     debounce((blockId: string = "", newContent: string) => {
-      updateBlockContent({ newContent, blockId });
       socket.emit("block_content_updated", { pageId, blockId, newContent }); // 소켓 블록 업데이트 전송
-      // updateBlock({endpoint: `pages/${pageId}/blocks/${blockId}`,data: {newContent, blockId}})
+      updateBlock({ type: "content", blockId, newData: newContent });
     }, 1000),
     [pageId]
   );
 
-  const handleInput = (e: FormEvent<HTMLDivElement>, index: number) => {
+  const handleInput = (e: React.FormEvent<HTMLDivElement>, index: number) => {
     const newContent = e.currentTarget.innerText;
     const updatedBlocks = [...blocks];
     updatedBlocks[index].content = newContent;
     const blockId = updatedBlocks[index]._id;
-    saveBlock(blockId, newContent); 
+    saveBlock(blockId, newContent);
   };
 
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
@@ -119,9 +120,8 @@ function ArticleLayout() {
   };
 
   const handleUpdateBlockOrder = async (blocks: Block[]) => {
-    updateBlockOrder({ newData: blocks });
-    socket.emit('block_updated', { pageId, blocks }); // 소켓 블록(순서) 업데이트 전송
-    // updateBlock({endpoint: `pages/${pageId}/blocks`, data: { newData: blocks }})
+    socket.emit("block_updated", { pageId, blocks }); // 소켓 블록(순서) 업데이트 전송
+    updateBlock({ type: "order", newData: blocks });
   };
 
   const handleOnDragEnd = (result: DropResult) => {

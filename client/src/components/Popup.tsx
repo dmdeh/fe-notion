@@ -1,6 +1,7 @@
 import styled from "styled-components";
-import { NewPageData, useCreateNewData } from "../services/api";
 import { useNavigate, useParams } from "react-router-dom";
+import { useCreateNewPage } from "../hooks/usePage";
+import { NewPageData } from "../services/api";
 
 interface PopupProps {
   position: { top: number; left: number };
@@ -30,7 +31,7 @@ const BLOCK_POPUP_LIST = [
 
 const Popup: React.FC<PopupProps> = ({ position, onChangeBlockType }) => {
   const { id: pageId } = useParams<{ id: string }>();
-  const createNewData = useCreateNewData();
+  const createNewData = useCreateNewPage();
   const navigate = useNavigate();
 
   const handleNewPage = () => {
@@ -43,10 +44,10 @@ const Popup: React.FC<PopupProps> = ({ position, onChangeBlockType }) => {
     createNewData(newPageData, {
       onSuccess: ({ data }) => {
         const { _id } = data;
-        navigate(`/${_id}`); 
+        navigate(`/${_id}`);
       },
     });
-    onChangeBlockType("button")
+    onChangeBlockType("button");
   };
 
   return (
