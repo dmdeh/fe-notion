@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { io } from "socket.io-client";
 import { Block } from "./ArticleLayout";
 
-const URL = "http://localhost:3001";
+const URL = import.meta.env.VITE_SOCKET_URL;
 export const socket = io(URL);
 
 interface SocketIOExampleProps {
@@ -11,7 +11,11 @@ interface SocketIOExampleProps {
   onTitleUpdate: (newTitle: string) => void;
 }
 
-const SocketIO: React.FC<SocketIOExampleProps> = ({ pageId, onBlockUpdate, onTitleUpdate }) => {
+const SocketIO: React.FC<SocketIOExampleProps> = ({
+  pageId,
+  onBlockUpdate,
+  onTitleUpdate,
+}) => {
   useEffect(() => {
     socket.emit("join_room", pageId);
 
@@ -22,10 +26,6 @@ const SocketIO: React.FC<SocketIOExampleProps> = ({ pageId, onBlockUpdate, onTit
     socket.on("block_updated", (updatedBlocks: Block[]) => {
       onBlockUpdate(updatedBlocks);
     });
-
-    // socket.on("block_content_updated", (updatedBlocks: Block[]) => {
-    //   onBlockUpdate(updatedBlocks);
-    // });
 
     socket.on("block_content_updated", ({ blockId, newContent }) => {
       onBlockUpdate((prevBlocks: Block[]) => {

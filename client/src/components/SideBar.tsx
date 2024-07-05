@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { useGetPage, useCreateNewData, NewPageData } from "../services/api";
+import { NewPageData } from "../services/api";
 import PageList from "./PageList";
 import { buildPageTree } from "../utils/buildTree";
+import { useCreateNewPage, useGetPage } from "../hooks/usePage";
 
 export interface Page {
   _id: string;
@@ -19,7 +20,7 @@ export interface PageTree extends Page {
 export function SideBar() {
   const [pages, setPages] = useState<PageTree[]>([]);
   const { data } = useGetPage("pages");
-  const createNewData = useCreateNewData();
+  const createNewData = useCreateNewPage();
 
   useEffect(() => {
     if (data) setPages(buildPageTree(data));
