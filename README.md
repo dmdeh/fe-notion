@@ -4,17 +4,17 @@
 
 - 페이지
 
-![노션설명1](https://gist.github.com/user-attachments/assets/6079ff88-923e-493e-905b-8209ad991d9c)
+![노션설명1](https://github.com/user-attachments/assets/2fabd6c1-c0a4-4d26-81d3-92d97eedc2c5)
 
 - 블록
   - drag and drop
   - 슬래시 기능
 
-![노션설명2](https://gist.github.com/user-attachments/assets/388c0c35-4e1f-4e5e-9c9c-2e7bf3b3f703)
+![노션설명2](https://github.com/user-attachments/assets/25c5f412-a285-43f7-9c39-7aa520e65da6)
 
 - 동시 편집 기능
 
-![노션설명3](https://gist.github.com/user-attachments/assets/e59b3f4f-18bf-490a-9317-6aaaeb337c67)
+![노션설명3](https://github.com/user-attachments/assets/f47ee6e1-e90e-43a3-8ce9-47f83663bb30)
 
 ## Getting Started
 
@@ -22,3 +22,5 @@
 cd server/
 npm run dev
 ```
+
+
