@@ -1,35 +1,38 @@
 import styled from "styled-components";
+import ArticleLayout from "../components/ArticleLayout";
 
 function Pages() {
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/pages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "",
-          blocklist: [],
-          parent_id: "",
-        }),
-      });
-      if (!response.ok) {
-        console.log("실패 !");
-      }
-    } catch (error) {
-      console.error("Failed to submit new Pages:", error);
-    }
-  };
   return (
-    <>
-      <StyledButton onClick={handleSubmit}>+ 새 페이지 생성</StyledButton>
-    </>
+    <Wrapper>
+      <ArticleLayout />
+    </Wrapper>
   );
 }
 
-const StyledButton = styled.button`
-  width: 200px;
+const Wrapper = styled.div`
+  display: flex;
 `;
+
+console.log(`	
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn	
+nnnn                         nnnn	
+nnnnnnn                          nnnn	
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn	
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn	
+nnnnnnnn                           nnn	
+nnnnnnnn    nnnnnnnn     nnnnnnn   nnn	
+nnnnnnnn      nnnnnnn      nnn     nnn	
+nnnnnnnn      nnnnnnnn     nnn     nnn	
+nnnnnnnn      nnnnnnnnnn   nnn     nnn	
+nnnnnnnn      nnn nnnnnnn  nnn     nnn	
+nnnnnnnn      nnn  nnnnnnnnnnn     nnn	
+nnnnnnnn      nnn   nnnnnnnnnn     nnn	
+nnnnnnnn      nnn     nnnnnnnn     nnn	
+nnnnnnnn      nnn      nnnnnnn     nnn	
+nnnnnnnn    nnnnnnnn    nnnnnn     nnn	  
+  nnnnnn                           nnn		
+    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn		looking for a job!		  
+      nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn		https://github.com/dmdeh			 
+`);
 
 export default Pages;

@@ -1,54 +1,26 @@
-# fe-24-last
+# fe-notion
 
-## 1주차 페어 프로그래밍 [마롱m, 새턴s]
+## Description
 
-- React + TypeScript + Vite 설정
-- mongoDB 설정
+- 페이지
 
-### 앞으로 계획
-
-- 페이지 라우팅, 생성
-- 블록 생성
-- 웹 소켓 통신
-
-### 오늘 논의 한 내용, 학습 키워드
-
-- 라우팅 방식
-
-  - 고유한 아이디로 라우팅 `crypto.randomUUID();`
-  - 데이터 구조 고민중.
-
-  ```js
-  const pages = [
-    {
-      id: "1234567890abcdef1234567890abcdef",
-      title: "Home",
-      blocklist: [],
-      owner_id: "jsfhkewhfn1234",
-      parent_id: null,
-    },
-    {
-      id: "abcdef1234567890abcdef1234567890",
-      title: "Subpage 1",
-      blocklist: [],
-      owner_id: "jsfhkewhfn1234",
-      parent_id: "1234567890abcdef1234567890abcdef",
-    },
-  ];
-
-  const block = {
-    id: "eluhtwiu3o2874",
-    type: "text" || "page" || "title",
-    content: "안녕하세요",
-    page_id: "eiluhwiuhegl2143",
-    position: "애매함",
-  };
-  ```
+![노션설명1](https://github.com/user-attachments/assets/2fabd6c1-c0a4-4d26-81d3-92d97eedc2c5)
 
 - 블록
+  - drag and drop
+  - 슬래시 기능
 
-  - 페이지, 제목, 텍스트
+![노션설명2](https://github.com/user-attachments/assets/25c5f412-a285-43f7-9c39-7aa520e65da6)
 
-- 동시 편집
+- 동시 편집 기능
 
-  - 웹소켓 통신 방식
+![노션설명3](https://github.com/user-attachments/assets/f47ee6e1-e90e-43a3-8ce9-47f83663bb30)
+
+## Getting Started
+
+```bash
+cd server/
+npm run dev
+```
+
+

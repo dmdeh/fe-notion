@@ -1,46 +1,37 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const ChildrenSchema = new Schema({
+const ChildrenSchema = new Schema(
+  {
     type: String,
     content: String,
-});
+  },
+  {
+    versionKey: false,
+  }
+);
 
-const BlockSchema = new Schema({
+export const BlockSchema = new Schema(
+  {
     type: String,
     content: String,
     children: [ChildrenSchema] || [],
-});
+  },
+  {
+    versionKey: false,
+  }
+);
 
-const PageSchema = new Schema({
+const PageSchema = new Schema(
+  {
     title: String,
     blocklist: [BlockSchema] || [],
     parent_id: String || null,
-});
+  },
+  {
+    versionKey: false,
+  }
+);
 
-const Pages = mongoose.model("Page", PageSchema);
-
-export default Pages;
-
-
-// import mongoose from "mongoose";
-// const Schema = mongoose.Schema;
-
-// const ChildrenSchema = new Schema({
-//   type: String,
-//   content: String,
-// });
-
-// const BlockSchema = new Schema({
-//   type: String,
-//   content: String,
-//   children: [ChildrenSchema] || [],
-// });
-
-// const PageSchema = new Schema({
-//   title: String,
-//   blocklist: [BlockSchema] || [],
-//   parent_id: { type: String, default: null }
-// });
-
-// export default PageSchema;
+export const Pages = mongoose.model("Page", PageSchema);
+export const Blocks = mongoose.model("Block", BlockSchema);

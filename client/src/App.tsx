@@ -1,10 +1,12 @@
-import "./App.css";
-import Pages from "./pages/Pages";
+import { RouterProvider } from "react-router-dom";
+import routes from "./routers/routes";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function App() {
   return (
     <>
-      <Pages/>
+      <RouterProvider router={routes} />
+      <ReactQueryDevtools initialIsOpen={false}/>
     </>
   );
 }
