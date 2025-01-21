@@ -7,7 +7,7 @@ export const socket = io(URL);
 
 interface SocketIOExampleProps {
   pageId: string;
-  onBlockUpdate: (updatedBlocks: Block[]) => void;
+  onBlockUpdate: (updateFn: (prevBlocks: Block[]) => Block[]) => void;
   onTitleUpdate: (newTitle: string) => void;
 }
 
@@ -24,7 +24,7 @@ const SocketIO: React.FC<SocketIOExampleProps> = ({
     });
 
     socket.on("block_updated", (updatedBlocks: Block[]) => {
-      onBlockUpdate(updatedBlocks);
+      onBlockUpdate(() => updatedBlocks);
     });
 
     socket.on("block_content_updated", ({ blockId, newContent }) => {
