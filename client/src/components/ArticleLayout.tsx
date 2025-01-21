@@ -68,6 +68,7 @@ function ArticleLayout() {
     e: React.KeyboardEvent<HTMLDivElement>,
     index: number
   ) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
