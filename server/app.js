@@ -11,7 +11,7 @@ const port = 3000;
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://13.209.49.122:8080"],
   },
 });
 
@@ -54,7 +54,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("block_content_updated", ({ pageId, blockId, newContent }) => {
-    console.log(`Block content updated: ${pageId}, block: ${blockId}, ${newContent}`);
+    console.log(
+      `Block content updated: ${pageId}, block: ${blockId}, ${newContent}`
+    );
     io.to(pageId).emit("block_content_updated", { blockId, newContent });
   });
 });
