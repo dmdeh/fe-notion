@@ -25,7 +25,9 @@ export interface Block {
 }
 
 function ArticleLayout() {
-  const { id: pageId } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
+  const pageId = id ?? "";
+
   const updateNewTitle = usePatchNewTitle(pageId);
   const updateBlock = usePatchBlockData(pageId);
 
@@ -34,18 +36,9 @@ function ArticleLayout() {
   const { data: pageData } = useGetPage(`pages/${pageId}`);
   const cursorPositionRef = useRef<{ node: Node; offset: number } | null>(null);
 
-  const saveTitle = useCallback(
-    debounce((newTitle: string) => {
-      updateNewTitle({ newTitle });
-      socket.emit("title_updated", { pageId, newTitle });
-    }, 500), // 일단 사이드바에 거의 실시간으로 반영되게 하려고 0.5초로. debounce 필요한가? 상태로 가지고 있는게 나은가?
-    []
-  );
-
-  const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
-    const newTitle = e.currentTarget.innerText;
-
-    const selection = window.getSelection(); // 커서 위치 저장
+  // 커서 위치 저장 함수
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       cursorPositionRef.current = {
@@ -53,7 +46,32 @@ function ArticleLayout() {
         offset: range.endOffset,
       };
     }
+  };
 
+  // 커서 위치 복원 함수
+  const restoreCursorPosition = () => {
+    const selection = window.getSelection();
+    const cursorPosition = cursorPositionRef.current;
+    if (selection && cursorPosition) {
+      const range = document.createRange();
+      range.setStart(cursorPosition.node, cursorPosition.offset);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  };
+
+  const saveTitle = useCallback(
+    debounce((newTitle: string) => {
+      updateNewTitle({ newTitle });
+      socket.emit("title_updated", { pageId, newTitle });
+    }, 500), // 일단 사이드바에 거의 실시간으로 반영되게 하려고 0.5초로.
+    []
+  );
+
+  const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const newTitle = e.currentTarget.innerText;
+    saveCursorPosition();
     saveTitle(newTitle);
   };
 
@@ -128,16 +146,9 @@ function ArticleLayout() {
     const updatedBlocks = [...blocks];
     updatedBlocks[index].content = newContent;
     const blockId = updatedBlocks[index]._id;
-    saveBlock(blockId, newContent);
 
-    const selection = window.getSelection(); // 커서 위치 저장
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      cursorPositionRef.current = {
-        node: range.endContainer,
-        offset: range.endOffset,
-      };
-    }
+    saveCursorPosition();
+    saveBlock(blockId, newContent);
   };
 
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
@@ -167,24 +178,9 @@ function ArticleLayout() {
   useEffect(() => {
     if (pageData) {
       setTitle(pageData.title);
-      if (blocks.length === 0) {
-        // 처음에만 상태 반영
-        setBlocks(pageData.blocklist);
-      }
+      setBlocks(pageData.blocklist);
     }
   }, [pageId, pageData]);
-
-  const restoreCursorPosition = () => {
-    const selection = window.getSelection();
-    const cursorPosition = cursorPositionRef.current;
-    if (selection && cursorPosition) {
-      const range = document.createRange();
-      range.setStart(cursorPosition.node, cursorPosition.offset);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  };
 
   useEffect(() => {
     restoreCursorPosition();
@@ -193,7 +189,7 @@ function ArticleLayout() {
   return (
     <Wrapper>
       <SocketIO
-        pageId={pageId as string}
+        pageId={pageId}
         onBlockUpdate={(updatedBlocks) => setBlocks(updatedBlocks)}
         onTitleUpdate={(newTitle) => setTitle(newTitle)}
       />
