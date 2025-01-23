@@ -69,40 +69,48 @@ function ArticleLayout() {
     index: number
   ) => {
     if (e.nativeEvent.isComposing) return;
-    if (e.key === "Enter") {
-      if (e.shiftKey) return;
-      e.preventDefault();
-      const newData = {
-        type: "p",
-        content: "",
-        children: [],
-      };
-      const { data: newBlock } = await createBlock(pageId!, index + 1);
-      const { _id: blockId } = newBlock;
 
-      const updatedBlocks = [
-        ...blocks.slice(0, index + 1),
-        newBlock,
-        ...blocks
-          .slice(index + 1)
-          .map((block) => ({ ...block, index: block.index + 1 })),
-      ];
-      setBlocks(updatedBlocks);
-      updateBlock({ type: "block", blockId, newData });
-      socket.emit("block_updated", { pageId, blocks: updatedBlocks }); // 소켓 블록 content 업데이트 전송
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+
+      try {
+        const { data: newBlock } = await createBlock(pageId!, index + 1);
+        const updatedBlocks = [
+          ...blocks.slice(0, index + 1),
+          { ...newBlock, index: index + 1 },
+          ...blocks.slice(index + 1).map((block) => ({
+            ...block,
+            index: block.index + 1,
+          })),
+        ];
+
+        setBlocks(updatedBlocks);
+
+        updateBlock({ type: "order", newData: updatedBlocks });
+        socket.emit("block_updated", { pageId, blocks: updatedBlocks });
+      } catch (error) {
+        console.error("블록 생성에 문제가 발생했습니다:", error);
+      }
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
+
       if (blocks.length > 1) {
         const blockToDelete = blocks[index];
-        const updatedBlocks = [
-          ...blocks.slice(0, index),
-          ...blocks
-            .slice(index + 1)
-            .map((block) => ({ ...block, index: block.index - 1 })),
-        ];
-        setBlocks(updatedBlocks);
-        await deleteData(`pages/${pageId}/blocks/${blockToDelete._id}`);
-        socket.emit("block_updated", { pageId, blocks: updatedBlocks }); // 소켓 블록(삭제) 업데이트 전송
+
+        try {
+          await deleteData(`pages/${pageId}/blocks/${blockToDelete._id}`);
+          const updatedBlocks = [
+            ...blocks.slice(0, index),
+            ...blocks.slice(index + 1),
+          ].map((block) => ({ ...block, index: block.index - 1 }));
+
+          setBlocks(updatedBlocks);
+
+          updateBlock({ type: "order", newData: updatedBlocks });
+          socket.emit("block_updated", { pageId, blocks: updatedBlocks });
+        } catch (error) {
+          console.error("블록 삭제에 문제가 발생했습니다:", error);
+        }
       }
     }
   };
@@ -160,6 +168,7 @@ function ArticleLayout() {
     if (pageData) {
       setTitle(pageData.title);
       if (blocks.length === 0) {
+        // 처음에만 상태 반영
         setBlocks(pageData.blocklist);
       }
     }
@@ -237,7 +246,6 @@ function ArticleLayout() {
 }
 
 const Wrapper = styled.div`
-  /* padding-bottom: 30vh; */
   padding-left: 100px;
   padding-right: 100px;
   flex-grow: 1;
