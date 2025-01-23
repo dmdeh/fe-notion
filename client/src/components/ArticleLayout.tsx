@@ -53,7 +53,7 @@ function ArticleLayout() {
         offset: range.endOffset,
       };
     }
-    
+
     saveTitle(newTitle);
   };
 
@@ -159,9 +159,11 @@ function ArticleLayout() {
   useEffect(() => {
     if (pageData) {
       setTitle(pageData.title);
-      setBlocks(pageData.blocklist);
+      if (blocks.length === 0) {
+        setBlocks(pageData.blocklist);
+      }
     }
-  }, [pageData, pageId]);
+  }, [pageId, pageData]);
 
   const restoreCursorPosition = () => {
     const selection = window.getSelection();
